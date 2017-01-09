@@ -37,9 +37,17 @@ wfInfo = dict(
         T1Brain = [['imageSessionName','struc_brain']],
         nodiffBrain = [['imageSessionName', 'nodif_brain']],
         nodiffBrainMask = [['imageSessionName','nodif_brain_mask']],
+        dtidata = [['imageSessionName','data']],
+        bvecs = [['imageSessionName']],
+        bvals = [['imageSessionName']],
+        imageSessionName = [['imageSessionName']]
         )
+
+
+
 wfFieldTemplate = dict( T1Brain='%s/T1/%s.nii.gz', nodiffBrain = '%s/DTI/data/%s.nii.gz',
-        nodiffBrainMask = '%s/DTI/data/%s.nii.gz')
+        nodiffBrainMask = '%s/DTI/data/%s.nii.gz', dtidata = "%s/DTI/data/%s.nii.gz",
+	bvecs = "%s/DTI/data/bvecs", bvals = "%s/DTI/data/bvals", imageSessionName = "%s")
 
 # ## Create a datasource.. this basically helps me find the individual image files and data sets for an image session
 # ## a single image directory likely consists of DTI data, T2 images, T1 images, etc, etc
@@ -61,6 +69,43 @@ flirtToStd.inputs.dof = 12
 
 
 ### Now start connecting up the nodes/graph
+
+
+###bet = pe.Node(interface=fsl.BET(), name='bet')
+##bet.inputs.mask = True
+###bet.inputs.frac = 0.2
+
+#gen_fa.connect(datasource, 'dwi', eddy_correct, 'inputnode.in_file')
+
+#bet = pe.Node(interface=fsl.BET(), name='bet')
+#bet.inputs.mask = True
+#bet.inputs.frac = 0.2
+#gen_fa.connect(eddy_correct, 'pick_ref.out', bet, 'in_file')
+
+dtifit = pe.Node(interface=fsl.DTIFit(), name='dtifit')
+
+
+#### Generate all the connections needed for the DTIFIT module
+
+
+stoutPreProc_wf.connect(datasource,'bvecs',dtifit,'bvecs')
+stoutPreProc_wf.connect(datasource,'bvals',dtifit,'bvals')
+stoutPreProc_wf.connect(datasource,'dtidata',dtifit,'dwi')
+
+stoutPreProc_wf.connect(datasource, 'nodiffBrainMask', dtifit, 'mask')
+
+stoutPreProc_wf.connect(datasource, 'imageSessionName', dtifit, 'base_name')
+
+datasink = pe.Node(interface=nio.DataSink(), name="datasink")
+datasink.inputs.base_directory = os.path.join(os.path.abspath(NiPypeOutputDir),
+                                              'dgDevTesting_results')
+
+
+datasink.inputs.parameterization = False
+stoutPreProc_wf.connect(dtifit, 'FA', datasink, 'FA')
+stoutPreProc_wf.connect(dtifit, 'MD', datasink, 'MD')
+
+
 
 ### Infosource is already connected to the list of subject directories
 ## Connect InfoSource --> DataSource
