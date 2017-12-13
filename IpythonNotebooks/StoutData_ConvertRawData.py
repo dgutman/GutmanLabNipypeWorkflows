@@ -55,7 +55,13 @@ def generateNIIData( inputDcmDir, imageType, outputDir, debug=False):
     if not os.path.isdir(outputDir):
         os.makedirs(outputDir)
     #### I may also just want to call it t1Mprage or whatever we use as the default
-    dcmConverter(gzip_output=True,source_dir=inputDcmDir,
+
+    ##Only generate files if the output directory doesn't have anything in it..
+    
+    
+    if (len( os.listdir(outputDir))  == 0 ):
+    
+        dcmConverter(gzip_output=True,source_dir=inputDcmDir,
              output_dir=outputDir)
     
 
