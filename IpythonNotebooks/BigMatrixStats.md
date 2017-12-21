@@ -21,6 +21,10 @@ likely uint8 or uint16 should work, the 0.5's in the connectivity scores are mea
       2)  Look into PAPAYA  
       https://github.com/akeshavan/nbpapaya
       
+      also check out:
+      https://gist.github.com/armaneshaghi/2645723a28df96795aaa
+      
+      
       https://github.com/rii-mango/Papaya   We already got this working in Juputer, although probably should add to readme
       exactly how we did this
       
