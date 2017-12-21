@@ -29,7 +29,8 @@ likely uint8 or uint16 should work, the 0.5's in the connectivity scores are mea
       
       https://github.com/rii-mango/Papaya   We already got this working in Juputer, although probably should add to readme
       exactly how we did this
-      
+       and..
+       http://kevin-keraudren.blogspot.com/2013/12/xtk-and-mutant-mice-embryos.html
       
 5)  Need to work on a separate function that maps the "matrix encoded" data back into an actual brain space.. so
 rembember in the DOT file I referenced above, we essentially have a srcID, tgtID and then connectivity
