@@ -37,7 +37,11 @@ What we need to be able to do, is for a given srcID, I want to plot every tgtID 
   We want to EFFICIENTLY slice the connectivity MAtrix and then copy/map the relevent data into the BRAIN space array
   
   
-coords_for_fdt_matrix3  
+  So what you see is the actual lab map... which is stored in coords_for_fdt_matrix3   So let's say we slice the connecitivty matrix referenced about at srcID = 10;  this means the connectivity matrix was seeded from/initiated at coordinates 10,28,3 
+  
+  What we want to do is put a BLUE dot at this original seed point, and then for every other regoin that this seed connects to we want to put a RED dot (or more likely use a color map)...  this represents the connectivity matrix from srcID=10 to the rest of the brain... having a widget that allows us to play around with this data will be VERY helpful
+  
+<b>coords_for_fdt_matrix3  </b>
   
 16  22  1  0  1  
 11  31  2  0  2  
