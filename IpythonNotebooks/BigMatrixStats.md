@@ -31,6 +31,9 @@ likely uint8 or uint16 should work, the 0.5's in the connectivity scores are mea
       exactly how we did this
        and..
        http://kevin-keraudren.blogspot.com/2013/12/xtk-and-mutant-mice-embryos.html
+       
+       
+       https://kevin-keraudren.blogspot.co.uk/2016/11/london-28th-pydata-meetup-01112016.html
       
 5)  Need to work on a separate function that maps the "matrix encoded" data back into an actual brain space.. so
 rembember in the DOT file I referenced above, we essentially have a srcID, tgtID and then connectivity
