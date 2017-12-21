@@ -24,6 +24,8 @@ likely uint8 or uint16 should work, the 0.5's in the connectivity scores are mea
       also check out:
       https://gist.github.com/armaneshaghi/2645723a28df96795aaa
       
+      and 
+      https://www.datacamp.com/community/tutorials/matplotlib-3d-volumetric-data
       
       https://github.com/rii-mango/Papaya   We already got this working in Juputer, although probably should add to readme
       exactly how we did this
