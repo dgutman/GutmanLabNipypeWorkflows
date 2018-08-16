@@ -1,5 +1,6 @@
 DTI=/HCP_Data/HCP_BedpostData/100610/T1w/Diffusion/data.nii.gz
-DTI_B0=/HCP_Data/HCP_BedpostData/100610/T1w/Diffusion/nodif_brain.nii.gz
+DTI_B0=/HCP_Data/HCP_BedpostData/100610/T1w/Diffusion/nodif.nii.gz
+DTI_B0_BRAIN=/HCP_Data/HCP_BedpostData/100610/T1w/Diffusion/nodif_brain.nii.gz
 DTI_M=/HCP_Data/HCP_BedpostData/100610/T1w/Diffusion/nodif_brain_mask.nii.gz
 T1_M=/HCP_Data/HCP_BedpostData/100610/T1w/brainmask_fs.nii.gz
 T1=/HCP_Data/HCP_BedpostData/100610/T1w/T1w_acpc_dc.nii.gz
@@ -38,8 +39,8 @@ export ANTSPATH=/usr/lib/ants
 
 
 ### THIS GOES IN REVERSE
-WarpImageMultiTransform 3 $ROI_ONE ROI_ONE_to_subjDTI.nii.gz -R $DTI_B0 -i nodif_to_T1_Affine.txt -i T1_to_MNI_Affine.txt  T1_to_MNI_InverseWarp.nii.gz
-WarpImageMultiTransform 3 $ROI_ONE ROI_ONE_to_subjDTI_NN.nii.gz -R $DTI_B0 --use-NN -i nodif_to_T1_Affine.txt -i T1_to_MNI_Affine.txt  T1_to_MNI_InverseWarp.nii.gz
+#WarpImageMultiTransform 3 $ROI_ONE ROI_ONE_to_subjDTI.nii.gz -R $DTI_B0 -i nodif_to_T1_Affine.txt -i T1_to_MNI_Affine.txt  T1_to_MNI_InverseWarp.nii.gz
+#WarpImageMultiTransform 3 $ROI_ONE ROI_ONE_to_subjDTI_NN.nii.gz -R $DTI_B0 --use-NN -i nodif_to_T1_Affine.txt -i T1_to_MNI_Affine.txt  T1_to_MNI_InverseWarp.nii.gz
 
 ## --use-NN: Use Nearest Neighbor Interpolation. 
  
@@ -63,3 +64,16 @@ WarpImageMultiTransform 3 $ROI_ONE ROI_ONE_to_subjDTI_NN.nii.gz -R $DTI_B0 --use
 
 #Fslmerge –t Subj*_fdt_paths_thresh_norm_in_MNIspace.nii.gz à this becomes the input for randomi
 
+thisfolder=${PWD}/sampleOutput
+sub=11111 
+
+antsRegistration --dimensionality 3 --float 0 \
+--output [$thisfolder/NN_DTI_to_Struct_${sub}_,$thisfolder/NN_DTI_to_Struct_${sub}_Warped.nii.gz] \
+--interpolation NearestNeighbor \
+--winsorize-image-intensities [0.005,0.995] \
+--use-histogram-matching 0 \
+--transform Rigid[0.1] \
+--metric MI[$T1_BRAIN,$DTI_B0,1,32,Regular,0.25] \
+--convergence [1000x500x250x100,1e-6,10] \
+--shrink-factors 8x4x2x1 \
+--smoothing-sigmas 3x2x1x0vox 

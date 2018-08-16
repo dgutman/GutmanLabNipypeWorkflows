@@ -64,6 +64,7 @@ dogscan_datasource = pe.Node(nio.DataGrabber(infields=['subject_id'],outfields=[
         name="dog_axl_sag_datasource")
 
 dogscan_datasource.inputs.base_directory = base_subject_directory 
+dogscan_datasource.inputs.sort_filelist=True
 dogscan_datasource.inputs.template ='*'
 dogscan_datasource.inputs.field_template = { 'axl_t2': '%s/*/*axl-t2*.nii*', 'sag_t2': '%s/*/sag-t2*.nii*', 
 		'axial_bet_mask' : '%s/*/axial_mask/*.hdr'	}
