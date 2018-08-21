@@ -32,7 +32,7 @@ export ANTSPATH=/usr/lib/ants
 
 
 ### Thsi registers the T1 Brain image nonlinearly to MNI Space.. and also generated the inverse warp
-#antsIntroduction.sh -d 3 -r $MNI_BRAIN  -i $T1_BRAIN -o T1_to_MNI_ -t GR
+antsIntroduction.sh -d 3 -r $MNI_BRAIN  -i $T1_BRAIN -o T1_to_MNI_ -t GR
 
 ### note T1_To_MNI_Warp is the warp transform.. and we add two affine matrices which are also real files
 #WarpImageMultiTransform 3 $DTI_B0  nodif_to_MNI_test.nii.gz -R $MNI_BRAIN  T1_to_MNI_Warp.nii.gz T1_to_MNI_Affine.txt nodif_to_T1_Affine.txt
