@@ -98,6 +98,10 @@ dog_preproc_wf.connect(dogscan_datasource,'axl_t2',image_dims,'nifti_input_file'
 
 crop_axial_image    =pe.Node(interface=fsl.ExtractROI(),name='crop_axial_image')
 list2str = lambda x: ' '.join([str(int(val)) for val in x])
+
+
+paddedlist2str = lambda x: '%s %s %s %s %s %s ' % (x[0]-1,x[1]+2,x[2]-1,x[3]+2,x[4]-1,x[5]+2)
+
 dog_preproc_wf.connect(get_axial_crop_box,('out_stat',list2str),crop_axial_image,'args')
 dog_preproc_wf.connect(dogscan_datasource,'axl_t2',crop_axial_image,'in_file')
 
