@@ -22,8 +22,7 @@ cfg = dict(execution={'remove_unnecessary_outputs': False,
                      'keep_inputs': True})
 config.update_config(cfg) 
 
-regScratchDir = "/data/NipypeScratch/run_hcp_reg_pipeline/"
-
+regScratchDir = "/data/HCP_Data/run_hcp_reg_pipeline_addDtiWarp/"
 
 # """
 # Setup for DataGrabber inputs needed for the registration pipeline; This is using the freesurfer nodif and t1 masks
@@ -33,7 +32,7 @@ ds = nio.DataGrabber(infields=['subject_id'],
 
 datasource = pe.Node(interface=ds,name="datasource")
 # create a node to obtain the functional images
-datasource.inputs.base_directory = "/data/HCP_BedpostData/"
+datasource.inputs.base_directory = "/data/HCP_Data/HCP_BedpostData/"
 datasource.inputs.template ='*'
 datasource.inputs.sort_filelist = True
 datasource.inputs.field_template = dict(
@@ -52,9 +51,12 @@ datasource.inputs.template_args = dict(
              struct_mask = [['subject_id']],
              struct_brain = [['subject_id']] )
 
-subjRootDir = "/data/HCP_BedpostData/"
+subjRootDir = "/data/HCP_Data/HCP_BedpostData/"
 FULL_SUBJECT_LIST = [x for x in os.listdir(subjRootDir) if os.path.isdir( subjRootDir+x+'/T1w/Diffusion.bedpostX')]
 print(len(FULL_SUBJECT_LIST),"Subjects are potentially available to be processed!")
+
+#FULL_SUBJECT_LIST = ["569965","123723","130518","188145","385046","176845","139435","728454","694362"]
+
 
 """
 Setup for Registration  Pipeline InfoSource i.e. subjects
@@ -65,12 +67,12 @@ subj_infosource.iterables = ('subject_id', FULL_SUBJECT_LIST)
 ### Above just converts the list of subjects into an iterable list I can connect to the next part of the pipeline
 
 #roi = "/data/HCP_Data/EHECHT_ROIS/Human_Hypothalamus_Left.nii.gz"
-roiList = glob.glob("/data/EHECHT_ROIS/Human_*nii.gz")
+roiList = glob.glob("/data/HCP_Data/EHECHT_ROIS/Human_*nii.gz")
 
 #### RIGID BODY REGISTRATION OF DTI -- >  Struct Brain    using RegSynQuick
 reg_DTI_to_Struct = pe.Node( RegistrationSynQuick(
                              num_threads=3,
-                             transform_type='r',output_prefix="dtiToStruct"),
+                             transform_type='sr',output_prefix="dtiToStruct"),
                              name='reg_DTI_to_Struct')
 
 reg_Struct_to_MNI = pe.Node( RegistrationSynQuick(
@@ -85,7 +87,7 @@ warp_ROIs_MNI_to_DTI.iterables = ('input_image', roiList)
 ## CREATE A DATASINK TO COPY OVER THE ROIS IN STANDARD SPACE-- ALSO COPY OVER THE XFMS IN FUTURE VERSION
 
 datasink = pe.Node(nio.DataSink(), name='datasink')
-datasink.inputs.base_directory = '/data/HCP_BedpostData/addlInfo/'
+datasink.inputs.base_directory = '/data/HCP_Data/HCP_BedpostData/addlInfo/'
 
 datasink.inputs.substitutions = [ ('_subject_id_', ''), ('_input_image_..data..EHECHT_ROIS..', 'DTI_ROIs/'),
                                  ('Human_BasalForebrain_Bilat.nii.gz/',''),
@@ -131,11 +133,13 @@ run_hcp_reg.connect(reg_Struct_to_MNI,'inverse_warp_field',datasink,'subject.@in
 run_hcp_reg.connect(reg_Struct_to_MNI,'out_matrix',datasink,'subject.@affine_mtx')
 
 run_hcp_reg.connect( reg_DTI_to_Struct, "out_matrix",datasink, "subject.@dtiToStructMat"   )
+run_hcp_reg.connect( reg_DTI_to_Struct, "out_matrix",merge_xfms, "subject.@dtiToStruct_fdwwarp"   )
+run_hcp_reg.connect( reg_DTI_to_Struct, "out_matrix",merge_xfms, "subject.@dtiToStruct_invwarp"   )
 
 run_hcp_reg.connect( warp_ROIs_MNI_to_DTI,"output_image",datasink,"subject.@roisInDTISpace")
 
 #run_hcp_reg.write_graph()
-run_hcp_reg.run(plugin='MultiProc', plugin_args={'n_procs' : 40})
+run_hcp_reg.run(plugin='MultiProc', plugin_args={'n_procs' : 30})
 
 
 Image('/data/HCP_Data/NipypeScratch/run_hcp_reg_pipeline/run_hcp_reg_pipeline/graph.png')                    
