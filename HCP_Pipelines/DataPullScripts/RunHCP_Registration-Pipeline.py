@@ -12,6 +12,7 @@ from nipype.interfaces.ants import RegistrationSynQuick
 from IPython.display import Image
 from nipype.interfaces.fsl import Info
 from nipype.interfaces.ants import WarpImageMultiTransform
+from nipype.interfaces.ants import ApplyTransforms
 from nipype import config
 
 from os.path import join as opj
@@ -22,7 +23,11 @@ cfg = dict(execution={'remove_unnecessary_outputs': False,
                      'keep_inputs': True})
 config.update_config(cfg) 
 
-regScratchDir = "/data/HCP_Data/run_hcp_reg_pipeline_addDtiWarp/"
+
+mountPoint = "/data/HCP_Data/" ### I am sometimes running this in a docker container
+
+
+regScratchDir = opj(mountPoint,"hcpRegPipeline_addDtiWarp/")
 
 # """
 # Setup for DataGrabber inputs needed for the registration pipeline; This is using the freesurfer nodif and t1 masks
@@ -32,7 +37,7 @@ ds = nio.DataGrabber(infields=['subject_id'],
 
 datasource = pe.Node(interface=ds,name="datasource")
 # create a node to obtain the functional images
-datasource.inputs.base_directory = "/data/HCP_Data/HCP_BedpostData/"
+datasource.inputs.base_directory = opj(mountPoint,"HCP_BedpostData")
 datasource.inputs.template ='*'
 datasource.inputs.sort_filelist = True
 datasource.inputs.field_template = dict(
@@ -43,7 +48,7 @@ datasource.inputs.field_template = dict(
     struct_brain='%s/T1w/T1w_acpc_dc_masked.nii*'
 )
 
-# datasource.base_dir="/data/HCP_Data/NipypeScratch/datasource_cache_v2"
+
 datasource.inputs.template_args = dict(
              nodif_brain = [['subject_id']],
              nodif_brain_mask =  [['subject_id']],
@@ -51,7 +56,7 @@ datasource.inputs.template_args = dict(
              struct_mask = [['subject_id']],
              struct_brain = [['subject_id']] )
 
-subjRootDir = "/data/HCP_Data/HCP_BedpostData/"
+subjRootDir = opj(mountPoint,"HCP_BedpostData/")
 FULL_SUBJECT_LIST = [x for x in os.listdir(subjRootDir) if os.path.isdir( subjRootDir+x+'/T1w/Diffusion.bedpostX')]
 print(len(FULL_SUBJECT_LIST),"Subjects are potentially available to be processed!")
 
@@ -63,11 +68,11 @@ Setup for Registration  Pipeline InfoSource i.e. subjects
 """
 subj_infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']),  name="subj_infosource")
 #infosource.iterables = ('subject_id', SampleSubjList)
-subj_infosource.iterables = ('subject_id', FULL_SUBJECT_LIST)
+subj_infosource.iterables = ('subject_id', FULL_SUBJECT_LIST[:20])
 ### Above just converts the list of subjects into an iterable list I can connect to the next part of the pipeline
 
 #roi = "/data/HCP_Data/EHECHT_ROIS/Human_Hypothalamus_Left.nii.gz"
-roiList = glob.glob("/data/HCP_Data/EHECHT_ROIS/Human_*nii.gz")
+roiList = glob.glob( opj(mountPoint,"/EHECHT_ROIS/Human_*nii.gz"))
 
 #### RIGID BODY REGISTRATION OF DTI -- >  Struct Brain    using RegSynQuick
 reg_DTI_to_Struct = pe.Node( RegistrationSynQuick(
