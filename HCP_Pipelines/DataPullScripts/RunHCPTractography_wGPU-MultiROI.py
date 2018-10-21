@@ -32,7 +32,7 @@ subj_infosource.iterables = ('subject_id', FULL_SUBJECT_LIST)
 # Setup for DataGrabber inputs needed for probtrackx2
 # """
 datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
-        outfields=['nodif_brain_mask','xfm','invxfm','thsamples','phsamples','fsamples','mniROIs']),
+        outfields=['nodif_brain_mask','thsamples','phsamples','fsamples','mniROIs']),
         name='datasource')
 # create a node to obtain the functional images
 datasource.inputs.base_directory = "/data/HCP_BedpostData/"
@@ -43,9 +43,7 @@ datasource.inputs.field_template = dict(
     fsamples='%s/T1w/Diffusion.bedpostX/merged_%s.nii*',
     phsamples='%s/T1w/Diffusion.bedpostX/merged_%s.nii*',
     nodif_brain_mask='%s/T1w/Diffusion.bedpostX/%s.nii*', 
-    xfm='%s/MNINonLinear/xfms/%s.nii*',
-    invxfm='%s/MNINonLinear/xfms/%s.nii*',
-    mniROIs='addlInfo/subject/%s/DTI_ROIs/Human_*_wimt.nii.gz'
+    mniROIs='addlInfoV2/subject/%s/DTI_ROIs/Human_*_trans.nii.gz'
     )
 
 datasource.inputs.template_args = dict(
@@ -53,14 +51,8 @@ datasource.inputs.template_args = dict(
              phsamples =  [['subject_id','ph1samples']],
              fsamples =  [['subject_id','f1samples']],
              nodif_brain_mask = [['subject_id','nodif_brain_mask']],
-             xfm = [['subject_id','acpc_dc2standard']],
-             invxfm = [['subject_id', 'standard2acpc_dc']],
-            mniROIs=[['subject_id']]    
+            mniROIs=[['subject_id']]
         )
-
-
-# In[5]:
-
 
 pbx2 = pe.MapNode(interface=fsl.ProbTrackX2(), name='pbx2', iterfield=['seed'])
 pbx2.inputs.c_thresh = 0.2   # -c 0.2   F cutoff
@@ -73,7 +65,7 @@ pbx2.inputs.correct_path_distribution = True # -pd  i.e. distance correction
 
 
 #runpbx.connect(subj_infosource,'subject_id',datasource,'subject_id')
-runpbx2  = pe.Workflow(name="runpbx2_gpu_dtispace")
+runpbx2  = pe.Workflow(name="runpbx2_gpu_dtispace_fixedwarps")
 runpbx2.base_dir = "/data/NipypeScratch/"
 
 samples_base_name_fxn = lambda x : x.replace('_th1samples.nii.gz','')
