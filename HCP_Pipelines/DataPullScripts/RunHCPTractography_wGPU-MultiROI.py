@@ -16,7 +16,7 @@ from nipype import config
 #get_ipython().system(u'probtrackx2')
 
 subjRootDir = "/data/HCP_BedpostData/"
-FULL_SUBJECT_LIST = [x for x in os.listdir(subjRootDir) if os.path.isdir( subjRootDir+'/addlInfo/subject/'+x)]
+FULL_SUBJECT_LIST = [x for x in os.listdir(subjRootDir) if os.path.isdir( subjRootDir+'/addlInfoV2/subject/'+x)]
 print(len(FULL_SUBJECT_LIST),"Subjects are potentially available to be processed!")
 
 """
@@ -35,7 +35,7 @@ datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
         outfields=['nodif_brain_mask','thsamples','phsamples','fsamples','mniROIs']),
         name='datasource')
 # create a node to obtain the functional images
-datasource.inputs.base_directory = "/data/HCP_BedpostData/"
+datasource.inputs.base_directory = subjRootDir
 datasource.inputs.template ='*'
 datasource.inputs.sort_filelist = True
 datasource.inputs.field_template = dict(
@@ -84,7 +84,7 @@ runpbx2.connect( datasource,'mniROIs', pbx2,'seed')  #pbx2 is a mapnode, so it w
 #runpbx2.run(plugin='MultiProc', plugin_args={'n_procs' : 1})
 runpbx2.run()
 
-graphFile = runpbx2.write_graph(graph2use='orig',simple_form=False)
+#graphFile = runpbx2.write_graph(graph2use='orig',simple_form=False)
 
 
 #print(gen_fa.write_graph(graph2use='colored',simple_form=False))
